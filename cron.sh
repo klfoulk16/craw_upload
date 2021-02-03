@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 source /Users/kellyfoulk/Documents/code/crawUpload/venv/bin/activate
 
-python /Users/kellyfoulk/Documents/code/crawUpload/test.py
+PATH=${PATH}:/usr/local/bin
+python /Users/kellyfoulk/Documents/code/crawUpload/crawActivities.py
 
 if [ $? -eq 0 ]
 then

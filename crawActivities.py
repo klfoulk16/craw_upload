@@ -140,36 +140,37 @@ def upload_csv(file):
 
     # open CRAW activity upload page
     # get geeksforgeeks.org
-    driver.get("https://runsignup.com/Race/Results/95983/ActivityEntry?registrationId=48230231&eventId=433587")
+    driver.get("https://runsignup.com/Race/Results/95983/ActivityEntry?registrationId=46282616&eventId=430594")
 
     # # potentially handle login issues
     # #type in email address
     # # get element 
     element = driver.find_element_by_name("email")
 
-
+    time.sleep(5)
     # # send keys 
     element.send_keys("***REMOVED***")
+    time.sleep(5)
     element.submit()
 
     
     # # select import activities by CSV
     # #upload_button = driver.find_element_by_id("uploadActivities")
     upload_button = driver.find_element_by_name("activities_file")
-
+    time.sleep(5)
 
     # # upload CSV
     file = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"
     upload_button.send_keys(file)
 
-
+    time.sleep(5)
     # # delete pesky first item
     delete = driver.find_element_by_xpath("//button[@value='delete']")
     delete.click()
-
+    time.sleep(5)
     # # hit submit
     driver.find_element_by_name("activity[1][comment]").submit()
-
+    time.sleep(5)
     driver.quit()
 
 

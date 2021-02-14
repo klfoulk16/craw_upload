@@ -1,11 +1,12 @@
 import os
-from dotenv import load_dotenv
+import dotenv
 import requests
 import json
 import csv
 import time
 import datetime
 import selenium.webdriver
+import sys
 
 def get_tokens():
     """Gets token either from file or by using refresh token if old one is expired.
@@ -67,9 +68,9 @@ def get_page_of_activities(strava_tokens):
     access_token = strava_tokens["access_token"]
 
     # today minus total number of seconds in a day
-    tstamp = int(time.time()-86400)
+    tstamp = int(os.getenv('LAST_UPLOAD_DATE'))
 
-    tstamp = 1611816430
+    #tstamp = 1611816430
 
     return requests.get(
         url
@@ -79,7 +80,9 @@ def get_page_of_activities(strava_tokens):
         + str(tstamp)
     )
 
+
 def print_to_csv(filename):
+    dotenv.load_dotenv()
     strava_tokens = get_tokens()
     r = get_page_of_activities(strava_tokens)
     if r.status_code == 200:
@@ -92,10 +95,10 @@ def print_to_csv(filename):
 
                 for x in range(len(r)):
                     #change date format datetime.datetime.strptime('2021-02-01T17:37:26Z', "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-                    #date = datetime.datetime.strptime(r[x]["start_date_local"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+                    date = datetime.datetime.strptime(r[x]["start_date_local"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
                     # to avoid errors importing tuesday's stuff on wednesday if there was something that was missed
                     # let's set all the dates to the day we're importing them
-                    date = datetime.datetime.today().strftime('%Y-%m-%d')
+                    #date = datetime.datetime.today().strftime('%Y-%m-%d')
                     # change meters to miles
                     distance = round(r[x]["distance"]/1609.34, 2)
                     # make sure activity type is not "Hike"
@@ -104,8 +107,12 @@ def print_to_csv(filename):
                     else:
                         act_type = r[x]["type"]
                     writer.writerow({'Activity Date': date, 'Distance in Miles': distance, 'Activity Type': act_type})
+        else:
+            print("There were no new activities.")
+            update_last_upload_date()
+            sys.exit()
     else:
-        print("Was not able to fetch summary activity array.")
+        sys.exit(f"Was not able to fetch activity array from Strava. Status code: {r.status_code}\n")
 
 
 def mock_to_csv(filename):
@@ -132,52 +139,57 @@ def mock_to_csv(filename):
 
 
 def upload_csv(file):
-    #from webdriver_manager.chrome import ChromeDriverManager
-
     # # create webdriver
-    #driver = selenium.webdriver.Chrome(ChromeDriverManager().install())
     driver = selenium.webdriver.Chrome()
 
     # open CRAW activity upload page
     # get geeksforgeeks.org
-    driver.get("https://runsignup.com/Race/Results/95983/ActivityEntry?registrationId=46282616&eventId=430594")
+    driver.get("https://runsignup.com/Race/Results/95983/ActivityEntry?registrationId=***REMOVED***&eventId=***REMOVED***")
 
     # # potentially handle login issues
     # #type in email address
     # # get element 
     element = driver.find_element_by_name("email")
 
-    time.sleep(5)
     # # send keys 
     element.send_keys("***REMOVED***")
-    time.sleep(5)
     element.submit()
 
-    
     # # select import activities by CSV
     # #upload_button = driver.find_element_by_id("uploadActivities")
     upload_button = driver.find_element_by_name("activities_file")
-    time.sleep(5)
 
     # # upload CSV
     file = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"
     upload_button.send_keys(file)
 
-    time.sleep(5)
     # # delete pesky first item
     delete = driver.find_element_by_xpath("//button[@value='delete']")
     delete.click()
-    time.sleep(5)
+
     # # hit submit
     driver.find_element_by_name("activity[1][comment]").submit()
-    time.sleep(5)
+    time.sleep(1)
+
+    # check to make sure upload was successful
+    if not driver.find_element_by_id("vrActivitiesSuccess").is_displayed():
+        driver.quit()
+        sys.exit("Craw rejected the CSV upload.\n")
+
     driver.quit()
+
+
+def update_last_upload_date():
+    """Updates date of last upload in .env file to the current date and time"""
+    date = str(int(time.time()))
+    dotenv.set_key(".env", "LAST_UPLOAD_DATE", date)
 
 
 if __name__ == "__main__":
     # Get environment variables
-    load_dotenv()
+    dotenv.load_dotenv()
     filename = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"
     print_to_csv(filename)
     #mock_to_csv(filename)
     upload_csv(filename)
+    update_last_upload_date()

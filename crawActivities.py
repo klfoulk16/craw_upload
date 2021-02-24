@@ -112,7 +112,7 @@ def print_to_csv(filename):
             update_last_upload_date()
             sys.exit()
     else:
-        sys.exit(f"Was not able to fetch activity array from Strava. Status code: {r.status_code}\n")
+        sys.exit(f"Was not able to fetch activity array from Strava. Status code: {r.status_code}")
 
 
 def mock_to_csv(filename):
@@ -166,6 +166,7 @@ def upload_csv(file):
     # # delete pesky first item
     delete = driver.find_element_by_xpath("//button[@value='delete']")
     delete.click()
+    time.sleep(1)
 
     # # hit submit
     driver.find_element_by_name("activity[1][comment]").submit()
@@ -174,7 +175,7 @@ def upload_csv(file):
     # check to make sure upload was successful
     if not driver.find_element_by_id("vrActivitiesSuccess").is_displayed():
         driver.quit()
-        sys.exit("Craw rejected the CSV upload.\n")
+        sys.exit("Craw rejected the CSV upload.")
 
     driver.quit()
 
@@ -183,9 +184,12 @@ def update_last_upload_date():
     """Updates date of last upload in .env file to the current date and time"""
     date = str(int(time.time()))
     dotenv.set_key(".env", "LAST_UPLOAD_DATE", date)
+    print(f"Updated env to {date}")
 
 
 if __name__ == "__main__":
+    # add date for cronlog
+    print(datetime.datetime.now())
     # Get environment variables
     dotenv.load_dotenv()
     filename = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"

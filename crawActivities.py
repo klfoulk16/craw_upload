@@ -94,11 +94,12 @@ def print_to_csv(filename):
                 writer.writeheader()
 
                 for x in range(len(r)):
-                    #change date format datetime.datetime.strptime('2021-02-01T17:37:26Z', "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-                    date = datetime.datetime.strptime(r[x]["start_date_local"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-                    # to avoid errors importing tuesday's stuff on wednesday if there was something that was missed
+                    # old code used actual date
+                    # date = datetime.datetime.strptime(r[x]["start_date_local"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+                    # to avoid errors importing tuesday's stuff on wednesday 
+                    # if there was something that was missed
                     # let's set all the dates to the day we're importing them
-                    #date = datetime.datetime.today().strftime('%Y-%m-%d')
+                    date = datetime.datetime.today().strftime('%Y-%m-%d')
                     # change meters to miles
                     distance = round(r[x]["distance"]/1609.34, 2)
                     # make sure activity type is not "Hike"
@@ -124,8 +125,11 @@ def mock_to_csv(filename):
 
             writer.writeheader()
             for x in range(len(r)):
-                #change date format datetime.datetime.strptime('2021-02-01T17:37:26Z', "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
-                date = datetime.datetime.strptime(r[x]["start_date_local"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+                # old code used actual date, but now I'm just going to use 
+                # "today's" date to avoid any timing errors (dreaded tuesday)
+                # date = datetime.datetime.strptime(r[x]["start_date_local"],
+                # "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d")
+                date = datetime.datetime.today().strftime('%Y-%m-%d')
                 # change meters to miles
                 distance = round(r[x]["distance"]/1609.34, 2)
                 # make sure activity type is not "Hike"
@@ -183,7 +187,7 @@ def upload_csv(file):
 def update_last_upload_date():
     """Updates date of last upload in .env file to the current date and time"""
     date = str(int(time.time()))
-    dotenv.set_key(".env", "LAST_UPLOAD_DATE", date)
+    dotenv.set_key("/Users/kellyfoulk/Documents/code/crawUpload/.env", "LAST_UPLOAD_DATE", date)
     print(f"Updated env to {date}")
 
 

@@ -128,31 +128,28 @@ def upload_csv(file):
         + os.getenv("EVENT_ID")
     )
 
-    time.sleep(3)
-
     # get element for entering email address to authenticate
     element = driver.find_element_by_name("email")
     # type in email
     element.send_keys(os.getenv("EMAIL"))
     element.submit()
-    time.sleep(5)
+
     # select import activities by CSV button
     upload_button = driver.find_element_by_name("activities_file")
     # upload CSV
-    file = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"
     upload_button.send_keys(file)
 
-    time.sleep(10)   # make sure website is caught up
+    time.sleep(1)   # make sure website is caught up
 
     # delete pesky empty first item that will cause an error
     delete = driver.find_element_by_xpath("//button[@value='delete']")
     delete.click()
 
-    time.sleep(5)   # make sure website is caught up
+    time.sleep(1)   # make sure website is caught up
 
     # hit submit
     driver.find_element_by_name("activity[1][comment]").submit()
-    time.sleep(3)   # make sure website is caught up
+    time.sleep(1)   # make sure website is caught up
 
     # check to make sure upload was successful
     if not driver.find_element_by_id("vrActivitiesSuccess").is_displayed():
@@ -167,7 +164,7 @@ def update_last_upload_date():
     Updates date of last upload in .env file to the current date and time
     """
     date = str(int(time.time()))
-    dotenv.set_key("/Users/kellyfoulk/Documents/code/crawUpload/.env", "LAST_UPLOAD_DATE", date)
+    dotenv.set_key("/Users/kellyfoulk/Documents/code/craw_upload/.env", "LAST_UPLOAD_DATE", date)
     print(f"Updated env to {date}")
 
 
@@ -185,7 +182,7 @@ if __name__ == "__main__":
     if r.status_code == 200:
         r = r.json()
         if r:
-            filename = "/Users/kellyfoulk/Documents/code/crawUpload/daily_upload.csv"
+            filename = "/Users/kellyfoulk/Documents/code/craw_upload/daily_upload.csv"
             print_to_csv(filename, r)
             upload_csv(filename)
         else:
